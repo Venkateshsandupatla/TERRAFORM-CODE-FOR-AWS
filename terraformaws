@@ -1,0 +1,75 @@
+provider "aws" {
+  region     = "ap-south-1"
+  profile  = "****"
+}
+  
+   resource "aws_key_pair" "mykey00029" {
+key_name = "mykey00029"
+public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41  example@gmail.com"
+}
+
+resource "aws_security_group" "mysecurity00029" {
+name ="mysecurity00029"
+description = "Allow TLS inbound traffic"
+vpc_id = "vpc-**"
+ingress {
+description = "SSH"
+from_port = 22
+to_port = 22
+protocol = "tcp"
+cidr_blocks = [ "0.0.0.0/0" ]
+}
+ingress {
+description = "HTTP"
+from_port = 80
+to_port = 80
+protocol = "tcp"
+cidr_blocks = [ "0.0.0.0/0" ]
+}
+egress {
+from_port = 0
+to_port = 0
+protocol = "-1"
+cidr_blocks = ["0.0.0.0/0"]
+}
+tags = {
+Name = "mysecurity00029"
+}
+}
+      
+resource "aws_ebs_volume" "myvolume00029" {
+availability_zone = "ap-south-1a"
+size = 1
+tags = {
+Name = "myvolume00029"
+}
+}
+resource "aws_volume_attachment" "myvolume00029" {
+device_name = "/dev/sdf"
+volume_id = "${aws_ebs_volume.myvolume00029.id}"
+instance_id = "${aws_instance.myinstance00029.id}"
+}
+resource "aws_instance" "myinstance00029" {
+ami = "ami-0447a12f28fddb066"
+instance_type = "t2.micro"
+availability_zone = "ap-south-1a"
+key_name = "mykey00029"
+security_groups = [ "mysecurity00029" ]
+user_data = <<-EOF
+#! /bin/bash
+sudo yum update -y
+sudo yum install httpd -y
+sudo systemctl start httpd
+sudo systemctl enable httpd
+sudo yum install git -y
+mkfs.ext4 /dev/xvdf1
+mount /dev/xvdf1 /var/www/html
+cd /var/www/html
+git  clone https://github.com/Venkateshsandupatla/terraform.git
+
+EOF
+tags = {
+Name = "myterratask00029instance"
+}
+}
+ 
