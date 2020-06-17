@@ -49,6 +49,92 @@ device_name = "/dev/sdf"
 volume_id = "${aws_ebs_volume.myvolume00029.id}"
 instance_id = "${aws_instance.myinstance00029.id}"
 }
+ resource "aws_s3_bucket" "venkybucket1747" {
+
+  bucket = "venkybucket1747"
+  acl    = "public-read"
+
+
+  tags = {
+Name = "venkybucket1747"
+  }
+
+}
+
+
+locals {
+
+s3_origin_id = "myS3Origin"
+}
+ 
+ resource "aws_s3_bucket_object" "venkybucket1747" {
+
+  bucket = "venkybucket1747"
+  key    = "my server pic .jpg"
+  source = "C:/Users/ABHI/Desktop/my server pic .jpg.jpg"
+  acl = "public-read"
+}
+
+
+
+ resource "aws_cloudfront_distribution" "venky_1747" {
+  origin {
+    domain_name = aws_s3_bucket.venkybucket1747.bucket_regional_domain_name
+    origin_id   = local.s3_origin_id
+
+
+    custom_origin_config {
+    http_port = 80
+    https_port = 80
+    origin_protocol_policy = "match-viewer"
+    origin_ssl_protocols = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+    }
+  }
+
+
+  enabled             = true
+
+
+  default_cache_behavior {
+
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = local.s3_origin_id
+
+
+    forwarded_values {
+     query_string = false
+
+
+      cookies {
+        forward = "none"
+      }
+    }
+
+
+   viewer_protocol_policy = "allow-all"
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+
+ 
+   restrictions {
+     geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+
+  viewer_certificate {
+    cloudfront_default_certificate = true  
+
+  }
+
+}
+
 resource "aws_instance" "myinstance00029" {
 ami = "ami-0447a12f28fddb066"
 instance_type = "t2.micro"
